@@ -1,0 +1,12 @@
+# .gitignore
+.env
+# Node.js
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Environnement
+.env
+
+# PowerPoint générés (si tu veux éviter de les pousser)
+*.pptx
