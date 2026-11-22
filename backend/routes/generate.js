@@ -1,27 +1,23 @@
 import express from "express";
 import { generatePitch } from "../services/aiService.js";
 import { generatePresentation } from "../services/pptService.js";
+import { validateTopic } from "../utils/validateTopic.js";
 
 const router = express.Router();
 
 router.post("/generate", async (req, res) => {
-  const topic = typeof req.body?.topic === "string" ? req.body.topic.trim() : "";
-
-  if (topic.length < 5) {
-    return res.status(400).json({ error: "Décrivez votre projet en au moins 5 caractères." });
-  }
-
-  if (topic.length > 1200) {
-    return res.status(400).json({ error: "La description ne doit pas dépasser 1 200 caractères." });
+  const validation = validateTopic(req.body?.topic);
+  if (!validation.valid) {
+    return res.status(400).json({ error: validation.error });
   }
 
   try {
-    const pitch = await generatePitch(topic);
+    const pitch = await generatePitch(validation.topic);
     if (!pitch || typeof pitch !== "string") {
       throw new Error("Le service IA n'a pas retourné de pitch.");
     }
 
-    const pptFile = await generatePresentation(topic, pitch);
+    const pptFile = await generatePresentation(validation.topic, pitch);
     return res.json({ pitch, pptFile });
   } catch (error) {
     console.error("Erreur pendant la génération du pitch :", error.message);
